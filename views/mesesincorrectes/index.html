@@ -1,0 +1,20 @@
+<div ng-controller="mesesincorrectesController as Ctrl">
+
+    <!-- Alerts -->
+    <uib-alert ng-repeat="alert in alerts" type="{{alert.type}}" close="closeAlert($index)">{{alert.msg}}</uib-alert>
+
+    <h2 class="page-header">
+        Meses amb errors en el recompte oficial
+        <div class="pull-right">
+            <img ng-hide="loadingimage == null" ng-src="{{loadingimage}}" width="16px" height="16px" style="margin:none;">
+            <small><span style="color:red;">&Uacute;ltima actualitzaci&oacute; ({{estatrecompte.percentatge}}): {{estatrecompte.ultima_actualitzacio}}</span></small>
+        </div>
+    </h2>
+
+    <div>
+      <p>Les columnes en negre mostren els vots del recompte del CDR i les columnes en vermell mostren els vots del recompte oficial.</p>
+    </div>
+    <div>
+      <div id="votsgrid" ui-grid="gridOptions" ui-grid-selection ui-grid-exporter ui-grid-resize-columns ui-grid-move-columns ui-grid-empty-base-layer ui-grid-auto-resize ui-grid-pinning class="grid" style="width: 100%;height: 600px"></div>
+    </div>
+</div>

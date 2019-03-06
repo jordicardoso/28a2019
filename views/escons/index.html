@@ -1,0 +1,129 @@
+<style media="screen">
+    svg .seat {
+        cursor: pointer;
+        transition: all 500ms;
+    }
+
+    /* Colors dels partits */
+    svg .seat.cs { fill:#FA7515 }
+    svg .seat.jxc { fill: #FF5B9C }
+    svg .seat.erc { fill: #F8BC4B }
+    svg .seat.psc { fill: #C8001E }
+    svg .seat.com { fill: #701471 }
+    svg .seat.cup { fill: #F6E134 }
+    svg .seat.pp { fill: #4F92E1 }
+    svg .seat.pacma { fill: #BAC02E }
+    svg .seat.recortes { fill: #4B873E }
+    svg .seat.pumj { fill: #48BFE9 }
+    svg .seat.dialeg { fill: #999999 }
+
+    /* common */
+    svg .seat.vacant { fill: #FFFFFF }
+    svg .seat.no-party { fill: #909090; }
+
+    /* tooltip */
+    div.tooltip {
+      position: absolute;
+      text-align: center;
+      /*width: 80px;*/
+      /*height: 25px;*/
+      padding: 2px;
+      font: 14px sans-serif;
+      color: white;
+      background: grey;
+      border: 0px;
+      border-radius: 8px;
+      pointer-events: none;
+    }
+</style>
+<div ng-controller="esconsController">
+    <!-- Alerts -->
+    <uib-alert ng-repeat="alert in alerts" type="{{alert.type}}" close="closeAlert($index)">{{alert.msg}}</uib-alert>
+    <h2 class="page-header">
+      Repartiment d'escons
+      <div class="pull-right">
+          <img ng-hide="loadingimage == null" ng-src="{{loadingimage}}" width="16px" height="16px" style="margin:none;">
+          <small><span style="color:red;">&Uacute;ltima actualitzaci&oacute; ({{estatrecompte.percentatge}}): {{estatrecompte.ultima_actualitzacio}}</span></small>
+      </div>
+    </h2>
+    <div class="row">
+      <div class="col-sm-8" style="padding-left: 10px;">
+        <div class="alert alert-warning">
+            <small>
+                <p style="margin: 0;">Aquestes dades han estat obtingudes gr&agrave;cies a la col&middot;laboraci&oacute; de milers de voluntaris particulars i tamb&eacute; de la CUP i d'ERC.</p>
+            </small>
+        </div>
+        <div id="graphic-div">
+            <svg id="chart"></svg>
+            <script type="text/javascript">
+              // Define the div for the tooltip
+              var div = d3.select("body").append("div")
+              .attr("class", "tooltip")
+              .style("opacity", 0);
+
+              var width = window.innerWidth*0.4;
+              var height = window.innerHeight*0.4;
+
+              var draw = function () {
+
+                d3.select("#graphic-div").style("padding-left", (window.innerWidth/8) + "px");
+
+                var parliament = d3.parliament().width(width).height(height).innerRadiusCoef(0.4);
+                parliament.enter.fromCenter(true).smallToBig(true);
+                parliament.exit.toCenter(true).bigToSmall(true);
+                /*parliament.on("click", function(e) { console.log(e); });*/
+                parliament.on("mouseover", function(d) {
+                  div.transition()
+                      .duration(200)
+                      .style("opacity", .9);
+                  div	.html(d.party.name)
+                      .style("left", (d3.event.pageX) + "px")
+                      .style("top", (d3.event.pageY - 28) + "px");
+                });
+                parliament.on("mouseout", function(d) {
+                  div.transition()
+                      .duration(500)
+                      .style("opacity", 0);
+                });
+                var setData = function(d) {
+                    d3.select("svg").datum(d).call(parliament);
+                };
+                d3.json("/tuvotestucomptes/data/escons.json", setData);
+              }
+
+              // Responsive
+              d3.select(window)
+                .on("resize", function() {
+                  width = window.innerWidth*0.4;
+                  height = window.innerHeight*0.4;
+                  draw();
+                });
+
+              draw();
+            </script>
+        </div>
+      </div>
+      <div class="col-sm-4">
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th style="width: 10px">Color</th>
+              <th>Partit</th>
+              <th>Escons</th>
+              <th class="text-right" header-class="'text-right'">Vots</th>
+              <th>&nbsp;</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr ng-repeat="partit in escons">
+              <td bgcolor="{{partit.colour}}"></td>
+              <td>{{ partit.name }}</td>
+              <td>{{ partit.seats }}</td>
+              <td class="text-right" header-class="'text-right'">{{ partit.vots_pretty }}</td>
+              <td>&nbsp;</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+</div>
